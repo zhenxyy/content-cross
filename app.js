@@ -242,6 +242,7 @@
         </span>
         <span class="result-actions">
           <button class="btn btn-sm copy-btn" data-text="${escapeAttr(r.output)}">📋 复制</button>
+          <button class="btn btn-sm queue-add-btn" data-platform="${r.to}" data-content="${escapeAttr(r.output)}">📋 加入清单</button>
           <button class="btn btn-sm toggle-btn" data-target="result-${idx}">${idx === 0 ? '折叠' : '展开'}</button>
         </span>
       `;
@@ -259,8 +260,9 @@
     // 滚动到结果区
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // 绑定事件
+    // 绑定事件（含加入清单按钮）
     bindResultEvents();
+    bindQueueAddButtons();
     updateCollapseAllBtn();
   }
 
@@ -455,8 +457,249 @@
     return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  /* ========== 发布清单系统 ========== */
+  function getQueue() {
+    try { return JSON.parse(localStorage.getItem('cc_queue') || '[]'); }
+    catch { return []; }
+  }
+
+  function saveQueue(q) {
+    localStorage.setItem('cc_queue', JSON.stringify(q));
+  }
+
+  function generateTitle(content) {
+    const firstLine = content.split('\n')[0].replace(/^[#\s*【\]]+/, '').trim();
+    return firstLine.length > 40 ? firstLine.slice(0, 40) + '…' : firstLine || '未命名内容';
+  }
+
+  function addToQueue(content, platform) {
+    const q = getQueue();
+    q.unshift({
+      id: Date.now(),
+      title: generateTitle(content),
+      content: content,
+      platform: platform,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      publishedAt: null,
+      notes: ''
+    });
+    saveQueue(q);
+    renderQueue();
+    showToast('✅ 已加入发布清单');
+  }
+
+  function markPublished(id) {
+    const q = getQueue();
+    const item = q.find(i => i.id === id);
+    if (item) {
+      item.status = 'published';
+      item.publishedAt = new Date().toISOString();
+      saveQueue(q);
+      renderQueue();
+      showToast('✅ 标记为已发布');
+    }
+  }
+
+  function markPending(id) {
+    const q = getQueue();
+    const item = q.find(i => i.id === id);
+    if (item) {
+      item.status = 'pending';
+      item.publishedAt = null;
+      saveQueue(q);
+      renderQueue();
+    }
+  }
+
+  function deleteQueueItem(id) {
+    if (!confirm('确定删除这个条目？')) return;
+    const q = getQueue().filter(i => i.id !== id);
+    saveQueue(q);
+    renderQueue();
+  }
+
+  function updateQueueNotes(id, notes) {
+    const q = getQueue();
+    const item = q.find(i => i.id === id);
+    if (item) {
+      item.notes = notes;
+      saveQueue(q);
+    }
+  }
+
+  let queueFilter = 'pending';
+
+  function renderQueue(filter) {
+    queueFilter = filter || queueFilter;
+    const container = $('queueContainer');
+    const stats = $('queueStats');
+    const q = getQueue();
+
+    const pendingCount = q.filter(i => i.status === 'pending').length;
+    const pubCount = q.filter(i => i.status === 'published').length;
+    stats.textContent = `待发布 ${pendingCount} · 已发布 ${pubCount}`;
+
+    if (q.length === 0) {
+      container.innerHTML = '<p class="queue-empty">还没有待发布的内容。转换结果出来后，点「📋 加入清单」保存到这里。</p>';
+      return;
+    }
+
+    let html = `
+      <div class="queue-tabs">
+        <button class="queue-tab ${queueFilter === 'pending' ? 'active' : ''}" data-filter="pending">待发布 (${pendingCount})</button>
+        <button class="queue-tab ${queueFilter === 'published' ? 'active' : ''}" data-filter="published">已发布 (${pubCount})</button>
+        <button class="queue-tab ${queueFilter === 'all' ? 'active' : ''}" data-filter="all">全部 (${q.length})</button>
+      </div>
+    `;
+
+    const items = queueFilter === 'all' ? q : q.filter(i => i.status === queueFilter);
+
+    if (items.length === 0) {
+      html += `<p class="queue-empty">${queueFilter === 'pending' ? '🎉 全部已发布！' : '暂无已发布内容'}</p>`;
+      container.innerHTML = html;
+      bindQueueTabs();
+      return;
+    }
+
+    items.forEach(item => {
+      const platformName = PLATFORM_NAMES[item.platform] || item.platform;
+      const icon = PLATFORM_ICONS[item.platform] || '📄';
+      const date = new Date(item.createdAt).toLocaleDateString('zh-CN');
+      html += `
+        <div class="queue-item" data-id="${item.id}">
+          <span class="qi-status ${item.status}"></span>
+          <div class="qi-body">
+            <div class="qi-title" data-id="${item.id}">${escapeHtml(item.title)}</div>
+            <div class="qi-meta">
+              <span>${icon} ${platformName}</span>
+              <span>${date}</span>
+              ${item.publishedAt ? '<span>✅ ' + new Date(item.publishedAt).toLocaleDateString('zh-CN') + '</span>' : ''}
+            </div>
+            <div class="qi-notes" data-id="${item.id}" contenteditable="true" data-placeholder="添加备注（可选）">${escapeHtml(item.notes || '')}</div>
+          </div>
+          <div class="qi-actions">
+            ${item.status === 'pending'
+              ? `<button class="btn btn-xs btn-publish" data-id="${item.id}">✅ 发布</button>`
+              : `<button class="btn btn-xs btn-unpublish" data-id="${item.id}">↩️ 撤回</button>`
+            }
+            <button class="btn btn-xs btn-delete" data-id="${item.id}">🗑️</button>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+    bindQueueTabs();
+    bindQueueEvents();
+  }
+
+  function bindQueueTabs() {
+    $('queueContainer').querySelectorAll('.queue-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        renderQueue(this.dataset.filter);
+      });
+    });
+  }
+
+  function bindQueueEvents() {
+    // Publish
+    $('queueContainer').querySelectorAll('.btn-publish').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        markPublished(parseInt(this.dataset.id));
+      });
+    });
+
+    // Unpublish
+    $('queueContainer').querySelectorAll('.btn-unpublish').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        markPending(parseInt(this.dataset.id));
+      });
+    });
+
+    // Delete
+    $('queueContainer').querySelectorAll('.btn-delete').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        deleteQueueItem(parseInt(this.dataset.id));
+      });
+    });
+
+    // View detail
+    $('queueContainer').querySelectorAll('.qi-title').forEach(el => {
+      el.addEventListener('click', function() {
+        const id = parseInt(this.dataset.id);
+        showQueueDetail(id);
+      });
+    });
+
+    // Edit notes
+    $('queueContainer').querySelectorAll('.qi-notes').forEach(el => {
+      el.addEventListener('blur', function() {
+        const id = parseInt(this.dataset.id);
+        updateQueueNotes(id, this.textContent.trim());
+      });
+      el.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
+      });
+    });
+  }
+
+  function bindQueueAddButtons() {
+    document.querySelectorAll('.queue-add-btn').forEach(btn => {
+      // Remove old listener by cloning
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener('click', function() {
+        const content = this.dataset.content;
+        const platform = this.dataset.platform;
+        addToQueue(content, platform);
+      });
+    });
+  }
+
+  function showQueueDetail(id) {
+    const q = getQueue();
+    const item = q.find(i => i.id === id);
+    if (!item) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'queue-detail-overlay';
+    overlay.innerHTML = `
+      <div class="queue-detail-modal">
+        <div class="qdm-header">
+          <h3>${escapeHtml(item.title)}</h3>
+          <button class="btn btn-sm qdm-close">✕</button>
+        </div>
+        <div class="qdm-body">${escapeHtml(item.content)}</div>
+        <div class="qdm-footer">
+          <button class="btn btn-sm copy-btn" data-text="${escapeAttr(item.content)}">📋 复制内容</button>
+          <button class="btn btn-sm qdm-close">关闭</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.querySelectorAll('.qdm-close').forEach(el => {
+      el.addEventListener('click', () => overlay.remove());
+    });
+    overlay.addEventListener('click', function(e) {
+      if (e.target === this) overlay.remove();
+    });
+
+    // Copy inside modal
+    overlay.querySelector('.copy-btn')?.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const text = this.dataset.text;
+      navigator.clipboard.writeText(text).then(() => showToast('✅ 已复制'));
+    });
+  }
+
   /* ========== 初始化 ========== */
   renderHistory();
+  renderQueue();
   sourceText.focus();
 
 })();
