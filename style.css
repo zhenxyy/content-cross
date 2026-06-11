@@ -2,46 +2,46 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --primary: #5468ff;
-  --primary-light: #eef2ff;
-  --primary-dark: #3d4fcc;
-  --primary-gradient: linear-gradient(135deg, #5468ff 0%, #7c5cfc 100%);
-  --bg: #f4f6fa;
+  --primary: #e8654e;
+  --primary-light: #fef1ee;
+  --primary-dark: #d04d36;
+  --primary-gradient: linear-gradient(135deg, #e8654e 0%, #f49b5e 100%);
+  --bg: #faf8f5;
   --card-bg: #ffffff;
-  --text: #1e1e2e;
-  --text-secondary: #6b7094;
-  --border: #e4e7ef;
-  --radius: 14px;
-  --radius-sm: 8px;
+  --text: #2d2a28;
+  --text-secondary: #8a8580;
+  --border: #ece6e0;
+  --radius: 16px;
+  --radius-sm: 10px;
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
-  --shadow-md: 0 4px 14px rgba(0,0,0,0.06);
-  --shadow-hover: 0 8px 24px rgba(0,0,0,0.08);
+  --shadow: 0 1px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.06);
+  --shadow-hover: 0 12px 32px rgba(0,0,0,0.09);
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "PingFang SC", sans-serif;
-  --input-bg: #ffffff;
-  --toast-bg: #1e1e2e;
-  --toast-text: #ffffff;
-  --header-gradient: linear-gradient(135deg, #f4f6fa 0%, #eef2ff 100%);
+  --input-bg: #fefcf9;
+  --toast-bg: #2d2a28;
+  --toast-text: #faf8f5;
+  --header-gradient: linear-gradient(135deg, #faf6f0 0%, #fef1ee 100%);
 }
 
 [data-theme="dark"] {
-  --primary: #6b8aff;
-  --primary-light: #262a45;
-  --primary-dark: #8ba3ff;
-  --primary-gradient: linear-gradient(135deg, #6b8aff 0%, #8f7aff 100%);
-  --bg: #0f0f16;
-  --card-bg: #181820;
-  --text: #e6e6f0;
-  --text-secondary: #8888a0;
-  --border: #282840;
+  --primary: #f0927e;
+  --primary-light: #2d1e1a;
+  --primary-dark: #f4a88e;
+  --primary-gradient: linear-gradient(135deg, #f0927e 0%, #f6b07a 100%);
+  --bg: #141210;
+  --card-bg: #1e1b18;
+  --text: #e8e2dc;
+  --text-secondary: #8a8480;
+  --border: #2a2622;
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
-  --shadow: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 14px rgba(0,0,0,0.3);
-  --shadow-hover: 0 8px 24px rgba(0,0,0,0.4);
-  --input-bg: #20202e;
-  --toast-bg: #e6e6f0;
-  --toast-text: #0f0f16;
-  --header-gradient: linear-gradient(135deg, #0f0f16 0%, #181828 100%);
+  --shadow: 0 1px 4px rgba(0,0,0,0.3);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.3);
+  --shadow-hover: 0 12px 32px rgba(0,0,0,0.4);
+  --input-bg: #26221e;
+  --toast-bg: #e8e2dc;
+  --toast-text: #141210;
+  --header-gradient: linear-gradient(135deg, #141210 0%, #1e1b18 100%);
 }
 
 body {
@@ -129,18 +129,18 @@ body {
   color: var(--text-secondary);
 }
 
-.btn-ghost:hover { background: rgba(84,104,255,0.08); color: var(--primary); border-color: transparent; }
+.btn-ghost:hover { background: rgba(232,101,78,0.08); color: var(--primary); border-color: transparent; }
 
 .btn-primary {
   background: var(--primary-gradient);
   border: none;
   color: white;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(84,104,255,0.25);
+  box-shadow: 0 2px 8px rgba(232,101,78,0.25);
 }
 
 .btn-primary:hover {
-  box-shadow: 0 4px 16px rgba(84,104,255,0.35);
+  box-shadow: 0 4px 16px rgba(232,101,78,0.35);
   transform: translateY(-1px);
   color: white;
 }
@@ -164,7 +164,7 @@ body {
   transition: box-shadow 0.2s, border-color 0.2s;
 }
 
-.card:hover { box-shadow: var(--shadow-md); border-color: rgba(84,104,255,0.12); }
+.card:hover { box-shadow: var(--shadow-md); border-color: rgba(232,101,78,0.12); }
 
 .card-header {
   display: flex;
@@ -204,7 +204,7 @@ body {
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.api-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(84,104,255,0.1); }
+.api-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(232,101,78,0.1); }
 
 /* Toggle */
 .toggle-label {
@@ -312,7 +312,7 @@ body {
   cursor: pointer;
   transition: background 0.12s;
 }
-.result-header:hover { background: rgba(84,104,255,0.03); }
+.result-header:hover { background: rgba(232,101,78,0.03); }
 
 .result-header .platform-tag {
   font-weight: 600;
