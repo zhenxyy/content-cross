@@ -47,7 +47,7 @@
     if (isDark) {
       document.documentElement.removeAttribute('data-theme');
       localStorage.setItem('cc_theme', 'light');
-      themeToggle.textContent = '🌙 暗色';
+      themeToggle.textContent = '🌙 夜间';
     } else {
       document.documentElement.setAttribute('data-theme', 'dark');
       localStorage.setItem('cc_theme', 'dark');
@@ -486,7 +486,7 @@
     });
     saveQueue(q);
     renderQueue();
-    showToast('✅ 已加入发布清单');
+    showToast('✅ 已加入发布日历');
   }
 
   function markPublished(id) {

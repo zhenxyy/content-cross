@@ -3,18 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ContentCross · 跨平台内容分发</title>
+  <title>CrossPost · 跨平台内容分发引擎</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="app">
     <!-- Header -->
     <header class="header">
-      <div class="logo">✧ ContentCross</div>
-      <p class="subtitle">写一次，发全网 · 智能改写适配各平台风格</p>
+      <div class="header-brand">
+        <div class="logo">
+          <span class="logo-icon">↗</span>
+          <span>CrossPost</span>
+        </div>
+        <p class="subtitle">一篇内容 · 同步分发全平台</p>
+      </div>
       <div class="header-actions">
-        <button class="btn btn-sm" id="templateBtn">📄 填入示例</button>
-        <button class="btn btn-sm" id="themeToggle">🌙 暗色</button>
+        <button class="btn btn-ghost" id="templateBtn">📄 示例</button>
+        <button class="btn btn-ghost" id="themeToggle">🌙 夜间</button>
       </div>
     </header>
 
@@ -24,7 +29,7 @@
       <!-- Settings bar -->
       <section class="card settings-card">
         <div class="card-header">
-          <h2>⚙️ 引擎设置</h2>
+          <h2>⚙️ 引擎</h2>
           <label class="toggle-label">
             <span id="engineLabel">🤖 AI 模式</span>
             <input type="checkbox" id="engineToggle" checked />
@@ -33,7 +38,7 @@
         </div>
         <div class="settings-body" id="settingsBody">
           <div class="settings-row">
-            <label>DeepSeek API Key</label>
+            <label>API Key</label>
             <div class="api-input-wrap">
               <input type="password" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxxxxxx" class="api-input" />
               <button class="btn btn-xs" id="toggleKeyVis">👁️</button>
@@ -43,12 +48,12 @@
           <div class="settings-row">
             <label>模型</label>
             <select id="modelSelect" class="select">
-              <option value="deepseek-chat">deepseek-chat</option>
-              <option value="deepseek-reasoner">deepseek-reasoner</option>
+              <option value="deepseek-chat">DeepSeek Chat</option>
+              <option value="deepseek-reasoner">DeepSeek Reasoner</option>
             </select>
           </div>
-          <div class="settings-row">
-            <span style="font-size:12px;color:var(--text-secondary)">💡 AI 模式用大模型改写，质量更高；规则模式不用 API Key，离线可用。</span>
+          <div class="settings-row settings-tip">
+            <span>💡 AI 模式改写更自然，需绑定 API Key。不填则自动降级为规则引擎，离线可用。</span>
           </div>
         </div>
       </section>
@@ -56,19 +61,19 @@
       <!-- Input section -->
       <section class="card input-card">
         <div class="card-header">
-          <h2>📝 原文</h2>
+          <h2>📝 原始内容</h2>
           <div class="input-meta">
             <select id="sourcePlatform" class="select">
-              <option value="xiaohongshu">来源：小红书</option>
-              <option value="wechat">来源：公众号</option>
-              <option value="douyin">来源：抖音脚本</option>
-              <option value="zhihu">来源：知乎</option>
-              <option value="bilibili">来源：B站</option>
+              <option value="xiaohongshu">原文来自：小红书</option>
+              <option value="wechat">原文来自：公众号</option>
+              <option value="douyin">原文来自：抖音</option>
+              <option value="zhihu">原文来自：知乎</option>
+              <option value="bilibili">原文来自：B站</option>
             </select>
-            <button class="btn btn-sm" id="clearBtn">清空</button>
+            <button class="btn btn-ghost btn-sm" id="clearBtn">清空</button>
           </div>
         </div>
-        <textarea id="sourceText" placeholder="在这里粘贴你的原文……" spellcheck="false"></textarea>
+        <textarea id="sourceText" placeholder="把你写好的内容粘贴到这里，AI 会自动分析并改写适配目标平台…" spellcheck="false"></textarea>
         <div class="input-footer">
           <span id="charCount">0 字</span>
         </div>
@@ -77,11 +82,11 @@
       <!-- Transform button -->
       <div class="transform-actions">
         <button class="btn btn-primary btn-lg" id="transformBtn">
-          ⚡ 一键转换
+          ✨ 开始改写
         </button>
         <div class="target-selectors-wrap">
           <div class="target-actions">
-            <span style="font-size:13px;color:var(--text-secondary)">目标平台：</span>
+            <span style="font-size:13px;color:var(--text-secondary)">分发到：</span>
             <button class="btn btn-xs" id="selectAllTargets">全选</button>
             <button class="btn btn-xs" id="deselectAllTargets">取消</button>
           </div>
@@ -108,8 +113,8 @@
       <!-- Results section -->
       <section class="card results-card" id="resultsSection" style="display:none">
         <div class="card-header">
-          <h2>🎯 改写结果</h2>
-          <button class="btn btn-sm" id="collapseAllBtn">全部折叠</button>
+          <h2>🎯 改写完成</h2>
+          <button class="btn btn-ghost btn-sm" id="collapseAllBtn">折叠全部</button>
         </div>
         <div id="resultsContainer"></div>
       </section>
@@ -117,21 +122,21 @@
       <!-- Publishing Queue section -->
       <section class="card queue-card" id="queueSection">
         <div class="card-header">
-          <h2>📋 发布清单</h2>
+          <h2>📋 发布日历</h2>
           <div class="queue-actions">
             <span id="queueStats" style="font-size:12px;color:var(--text-secondary)"></span>
           </div>
         </div>
         <div id="queueContainer">
-          <p class="empty-hint">还没有待发布的内容。转换结果出来后，点「📋 加入清单」保存到这里。</p>
+          <p class="empty-hint">内容改写后点击「📋 加入清单」保存到这里，统一管理你的发布计划。</p>
         </div>
       </section>
 
       <!-- History section -->
       <section class="card history-card" id="historySection">
         <div class="card-header">
-          <h2>📋 历史记录</h2>
-          <button class="btn btn-sm" id="clearHistoryBtn">清空</button>
+          <h2>📋 转换历史</h2>
+          <button class="btn btn-ghost btn-sm" id="clearHistoryBtn">清空</button>
         </div>
         <div id="historyContainer">
           <p class="empty-hint">还没有转换记录</p>
@@ -140,7 +145,8 @@
     </main>
 
     <footer class="footer">
-      <p>Made with Vibe Coding ✦ 写一次 · 发全网</p>
+      <p>CrossPost · 一篇内容，同步分发全平台</p>
+      <p class="footer-sub">Made with Vibe Coding & AI</p>
     </footer>
   </div>
 
